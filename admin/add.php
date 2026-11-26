@@ -73,7 +73,7 @@ function handleScan(uid) {
       document.getElementById('fieldUID').value = uid;
       document.getElementById('phaseWait').style.display = 'none';
       document.getElementById('phaseForm').style.display = '';
-      pendingCallback = null; // stop polling
+      stopPendingScan(); // Stop management capture once a new card is ready for registration.
     });
 }
 

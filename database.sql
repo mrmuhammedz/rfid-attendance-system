@@ -30,16 +30,55 @@ CREATE TABLE IF NOT EXISTS students (
 );
 
 -- ============================================
--- Attendance Table
+-- Shared Weekly Class Schedule
+-- day_of_week: 0=Saturday, 1=Sunday, ..., 6=Friday
+-- ============================================
+CREATE TABLE IF NOT EXISTS class_schedule (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    day_of_week TINYINT UNSIGNED NOT NULL,
+    start_time  TIME NOT NULL,
+    end_time    TIME NOT NULL,
+    title       VARCHAR(150) NOT NULL,
+    instructor_name VARCHAR(150) NOT NULL,
+    class_type  ENUM('lecture','section') NOT NULL DEFAULT 'lecture',
+    location    VARCHAR(100) NULL,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_schedule_day_time (day_of_week, start_time)
+);
+
+-- ============================================
+-- A dated occurrence of a recurring schedule entry
+-- ============================================
+CREATE TABLE IF NOT EXISTS class_sessions (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    schedule_id     INT NOT NULL,
+    session_date    DATE NOT NULL,
+    start_time      TIME NOT NULL,
+    end_time        TIME NOT NULL,
+    subject         VARCHAR(150) NOT NULL,
+    class_type      ENUM('lecture','section') NOT NULL,
+    instructor_name VARCHAR(150) NOT NULL,
+    location        VARCHAR(100) NULL,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_schedule_session (schedule_id, session_date),
+    FOREIGN KEY (schedule_id) REFERENCES class_schedule(id) ON DELETE RESTRICT
+);
+
+-- ============================================
+-- Attendance Table (one attendance record per student per class session)
 -- ============================================
 CREATE TABLE IF NOT EXISTS attendance (
     id          INT AUTO_INCREMENT PRIMARY KEY,
     student_id  INT NOT NULL,
+    session_id  INT NULL,
     date        DATE NOT NULL,
     status      ENUM('present','absent') DEFAULT 'present',
     scanned_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
-    UNIQUE KEY unique_attendance (student_id, date)
+    FOREIGN KEY (session_id) REFERENCES class_sessions(id) ON DELETE RESTRICT,
+    UNIQUE KEY unique_attendance_session (student_id, session_id),
+    INDEX idx_attendance_date (date)
 );
 
 -- ============================================

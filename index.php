@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Africa/Cairo');
 $today = date('l, F j, Y');
 ?>
 <!DOCTYPE html>
@@ -33,12 +34,20 @@ $today = date('l, F j, Y');
 
     <div class="guest-content">
 
-      <!-- Live scan banner -->
-      <div id="scanBanner" class="scan-banner">
-        <div class="scan-dot"></div>
-        <div class="scan-uid" style="color:var(--text-dim);font-size:.8rem;letter-spacing:3px">WAITING FOR CARD SCAN...
+      <div id="currentSessionWidget" class="current-session-widget pending">
+        <div class="current-session-icon"><i class="fa-regular fa-clock"></i></div>
+        <div class="current-session-copy">
+          <div class="current-session-kicker">Current schedule</div>
+          <div class="current-session-title">Checking the schedule…</div>
         </div>
-        <span class="scan-badge idle">IDLE</span>
+      </div>
+
+      <!-- Live scan banner -->
+      <div id="scanBanner" class="scan-banner disabled">
+        <div class="scan-dot"></div>
+        <div class="scan-uid" style="color:var(--text-dim);font-size:.8rem;letter-spacing:3px">CHECKING CURRENT CLASS...
+        </div>
+        <span class="scan-badge idle">CHECKING</span>
       </div>
 
       <!-- Stats -->
@@ -49,14 +58,14 @@ $today = date('l, F j, Y');
           <div class="stat-sub">Registered</div>
         </div>
         <div class="stat-card green">
-          <div class="stat-label">Present Today</div>
+          <div class="stat-label">Present in Session</div>
           <div class="stat-value" id="statPresent">—</div>
-          <div class="stat-sub"><?= $today ?></div>
+          <div class="stat-sub" id="statSessionSub">—</div>
         </div>
         <div class="stat-card red">
-          <div class="stat-label">Absent Today</div>
+          <div class="stat-label">Absent in Session</div>
           <div class="stat-value" id="statAbsent">—</div>
-          <div class="stat-sub">Not yet scanned</div>
+          <div class="stat-sub">Not scanned in this class</div>
         </div>
       </div>
 
@@ -74,7 +83,7 @@ $today = date('l, F j, Y');
                 <th style="text-align:center">Student ID</th>
                 <th style="text-align:center">Date</th>
                 <th style="text-align:center">Status</th>
-                <th style="text-align:center">Percentage</th>
+                <th style="text-align:center">Course / Section %</th>
               </tr>
             </thead>
             <tbody id="attendanceTable">

@@ -69,7 +69,7 @@ function handleScan(uid) {
       document.getElementById('fieldSID').value  = student.student_id;
       document.getElementById('phaseWait').style.display = 'none';
       document.getElementById('phaseForm').style.display = '';
-      pendingCallback = null;
+      stopPendingScan();
     });
 }
 

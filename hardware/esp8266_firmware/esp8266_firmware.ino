@@ -111,6 +111,26 @@ void showUnknown(String uid)
   tft.drawString(uid, tft.width() / 2, 185, 2);
 }
 
+void showInactive()
+{
+  tftClear();
+  tft.setTextDatum(MC_DATUM);
+  tft.setTextColor(TFT_DARKGREY);
+  tft.drawString("No Class", tft.width() / 2, 90, 4);
+  tft.setTextColor(TFT_YELLOW);
+  tft.drawString("Attendance Paused", tft.width() / 2, 145, 2);
+}
+
+void showManagementScan()
+{
+  tftClear();
+  tft.setTextDatum(MC_DATUM);
+  tft.setTextColor(TFT_GREEN);
+  tft.drawString("Card Read", tft.width() / 2, 90, 4);
+  tft.setTextColor(TFT_DARKGREY);
+  tft.drawString("Admin Mode", tft.width() / 2, 145, 2);
+}
+
 // ── Parse simple JSON value ───────────────────────────────────
 String parseJSON(String json, String key)
 {
@@ -153,7 +173,17 @@ void sendUID(String uid)
     String name = parseJSON(body, "name");
     String sid = parseJSON(body, "student_id");
 
-    if (status == "success")
+    if (status == "management")
+    {
+      clearRGB();
+      showManagementScan();
+    }
+    else if (status == "inactive")
+    {
+      clearRGB();
+      showInactive();
+    }
+    else if (status == "success")
     {
       beepSuccess();
       setRGB(false, true); // Green
@@ -193,6 +223,13 @@ void setup()
 {
   Serial.begin(115200);
   delay(100);
+
+  // Prepare RFID Chip Select BEFORE SPI activity
+  pinMode(SS_PIN, OUTPUT);
+  digitalWrite(SS_PIN, HIGH);
+
+  // Initialize SPI
+  SPI.begin();
 
   // TFT
   tft.init();
@@ -238,10 +275,9 @@ void setup()
   }
 
   // RFID
-  SPI.begin();
+  digitalWrite(SS_PIN, HIGH);
   rfid.PCD_Init();
   Serial.println("[RFID] Reader ready");
-
   showWaiting();
 }
 

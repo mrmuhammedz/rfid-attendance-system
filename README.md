@@ -15,8 +15,32 @@ The system reads RFID cards, sends data to a server, and displays results on a T
 - RGB LED status indication (Green = Authorized, Red = Unauthorized)
 - Active buzzer feedback
 - Real-time server communication (HTTP API)
-- User database with names and IDs
-- Duplicate attendance detection
+- Student and RFID-card management
+- Shared weekly timetable for lectures and sections
+- Attendance is recorded only during the scheduled class time
+- Attendance percentage is calculated separately for each schedule entry
+- Duplicate scans in the same class session are ignored
+
+## Web Application: Schedule-Aware Attendance
+
+The admin dashboard includes a weekly timetable. Each entry has a subject, type
+(lecture or section), instructor, room, day, and time. The timetable currently
+uses five fixed periods from 09:00 to 16:30, Saturday through Friday.
+
+The student and admin dashboards show the class in progress. RFID attendance is
+accepted only while a timetable entry is active, using the server's
+`Africa/Cairo` timezone. Outside a scheduled period, the scan banner is disabled
+and the API rejects attendance scans.
+
+The Add Student and Edit Student pages have a separate, temporary management
+scan mode. When one of those pages is waiting for a card, scanning captures the
+UID without recording attendance. This mode takes priority over attendance,
+including during a scheduled class, and stops after a usable card is captured
+or the page is closed.
+
+Attendance is stored per dated class session. The displayed percentage is for
+the active schedule entry; older attendance rows that predate session tracking
+remain preserved but cannot be attributed to a particular subject.
 
 ---
 
@@ -370,12 +394,24 @@ void sendUID(String uid)
     Serial.println("[HTTP] Response: " + body);
 
     // Extract values from JSON response
-    String status = parseJSON(body, "status");        // success / error
+    String status = parseJSON(body, "status");        // success / unknown / inactive / management
     String name = parseJSON(body, "name");            // student name
     String sid = parseJSON(body, "student_id");       // student ID
 
-    // If card is valid and attendance recorded
-    if (status == "success")
+    // Admin Add/Edit mode reads the card UID without recording attendance.
+    if (status == "management")
+    {
+      clearRGB();
+      showManagementScan();
+    }
+    // Attendance is not open outside a scheduled class.
+    else if (status == "inactive")
+    {
+      clearRGB();
+      showInactive();
+    }
+    // A valid card is recorded for the active class session.
+    else if (status == "success")
     {
       beepSuccess();           // Play success sound
       setRGB(false, true);    // Turn LED green

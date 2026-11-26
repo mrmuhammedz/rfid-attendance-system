@@ -32,6 +32,14 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
           <span class="nav-icon">▦</span> Dashboard
         </a>
 
+        <div class="nav-section-label">Schedule</div>
+        <a href="/attendance/admin/schedule.php" class="nav-item <?= $currentPage === 'schedule' ? 'active' : '' ?>">
+          <span class="nav-icon">▤</span> View Schedule
+        </a>
+        <a href="/attendance/admin/schedule_edit.php" class="nav-item <?= $currentPage === 'schedule_edit' ? 'active' : '' ?>">
+          <span class="nav-icon">✎</span> Edit Schedule
+        </a>
+
         <div class="nav-section-label">Students</div>
         <a href="/attendance/admin/add.php" class="nav-item <?= $currentPage === 'add' ? 'active' : '' ?>">
           <span class="nav-icon">＋</span> Add Student
